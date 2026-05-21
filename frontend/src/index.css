@@ -9,12 +9,16 @@
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-premium;
+  .neu-panel {
+    @apply bg-background rounded-3xl shadow-neu-flat border border-white/40;
   }
   
-  .glass-panel-hover {
-    @apply hover:bg-white/80 hover:shadow-premium-hover transition-all duration-300;
+  .neu-button {
+    @apply bg-background rounded-full shadow-neu-button transition-all duration-200 active:shadow-neu-button-active text-foreground font-medium border border-white/40;
+  }
+  
+  .neu-input {
+    @apply bg-background rounded-2xl shadow-neu-pressed p-4 border border-white/20 outline-none text-foreground;
   }
 }
 

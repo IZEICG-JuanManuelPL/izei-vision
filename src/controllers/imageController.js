@@ -17,16 +17,31 @@ const validateImage = async (req, res, next) => {
     }
 
     filePath = req.file.path;
-    logger.info(`Received image for validation: ${req.file.originalname} (${req.file.size} bytes)`);
+    const analysisType = req.body.analysisType || 'ai_validation';
+    const analysisContext = req.body.analysisContext || 'general';
+    logger.info(`Received image for validation: ${req.file.originalname} (${req.file.size} bytes), mode: ${analysisType}, context: ${analysisContext}`);
 
-    // 1. Extract and analyze metadata
-    const metadataAnalysis = await metadataService.extractMetadata(filePath);
+    let finalResult;
 
-    // 2. Perform visual analysis using OpenAI
-    const visualAnalysis = await openaiService.analyzeImage(filePath);
+    if (analysisType === 'data_extraction') {
+      // Data Extraction Mode
+      const extractionResult = await openaiService.extractData(filePath);
+      finalResult = {
+        mode: 'data_extraction',
+        extractedData: extractionResult.extractedData || {}
+      };
+    } else {
+      // AI Validation Mode (Default)
+      // 1. Extract and analyze metadata
+      const metadataAnalysis = await metadataService.extractMetadata(filePath);
 
-    // 3. Calculate final hybrid score
-    const finalResult = scoringService.calculateFinalScore(metadataAnalysis, visualAnalysis);
+      // 2. Perform visual analysis using OpenAI
+      const visualAnalysis = await openaiService.analyzeImage(filePath, analysisContext);
+
+      // 3. Calculate final hybrid score
+      finalResult = scoringService.calculateFinalScore(metadataAnalysis, visualAnalysis);
+      finalResult.mode = 'ai_validation';
+    }
 
     const executionTimeMs = Date.now() - startTime;
     logger.info(`Validation completed in ${executionTimeMs}ms`);

@@ -1,113 +1,161 @@
-# Image Validation Service
+# MedIA (IZEI Vision)
 
-Enterprise backend service to validate if an image was likely generated or manipulated by AI.
+Plataforma integral (Frontend + Backend) diseñada para la validación forense de imágenes mediante IA y la extracción inteligente de datos (OCR avanzado), con una interfaz de usuario moderna basada en Neumorfismo.
 
-## Features
-- **Metadata Forensics**: Uses `exiftool-vendored` to check for suspicious metadata and known AI generator fingerprints.
-- **Visual AI Analysis**: Leverages OpenAI Vision (`gpt-4o`) to detect typical visual anomalies associated with AI generation (e.g., deformed hands, synthetic patterns).
-- **Hybrid Scoring**: Combines metadata analysis and visual analysis to provide a final probabilistic score (`probable_ai_generated`, `probable_real`, `inconclusive`).
-- **Production Ready**: Built with Express, robust error handling, detailed Winston logging, security headers (Helmet, CORS), and temporary file cleanup.
-- **Dockerized**: Easy to deploy with Docker and `docker-compose`.
+## 🚀 Características Principales
 
-## Architecture
+1. **Validación de IA (Forense):**
+   - **Análisis de Metadatos:** Utiliza `exiftool-vendored` para detectar ausencia de datos de cámara o presencia de firmas de software generativo (Midjourney, DALL-E, etc.).
+   - **Análisis Visual (GPT-4o Vision):** Inspección minuciosa de anomalías visuales (textos ininteligibles, objetos fusionados, física imposible).
+   - **Perfiles de Contexto Analítico:** Permite inyectar reglas corporativas estrictas (Ej. "Los Chocorroles de Bimbo siempre vienen en pares y en empaque opaco") para una detección infalible.
+
+2. **Extracción de Datos (OCR Estructurado):**
+   - Transcripción automática de documentos (identificaciones, facturas, recibos) en formato JSON estructurado utilizando la potencia de GPT-4o.
+   - Opción nativa de copia rápida al portapapeles.
+
+3. **Interfaz Neumórfica (React + Tailwind):**
+   - Diseño vanguardista "Soft UI" o Neumorfismo con paleta de colores cuidada y animaciones fluidas (`framer-motion`).
+
+## 🏗️ Arquitectura del Proyecto
+
+El proyecto está dividido en dos partes principales:
+
 ```text
-src/
-├── app.js                 # Express application setup
-├── server.js              # Entry point
-├── config/                # Environment configuration
-├── constants/             # Shared constants (AI keywords)
-├── controllers/           # Route controllers
-├── middlewares/           # Custom middlewares (upload, error handling)
-├── routes/                # API route definitions
-├── services/              # Core business logic (Metadata, OpenAI, Scoring)
-├── utils/                 # Utilities (Logger, File cleanup)
-└── validations/           # (Reserved for additional request validation)
+MedIA/
+├── frontend/              # Aplicación Web (React + Vite + TailwindCSS)
+│   ├── src/
+│   │   ├── components/    # Componentes UI (Neumorfismo, Dashboards)
+│   │   ├── services/      # Comunicación con la API (Axios)
+│   │   └── utils/         # Utilidades (Gestión de clases tailwind)
+│   └── package.json       
+│
+├── src/                   # Servidor Backend (Node.js + Express)
+│   ├── config/            # Variables de entorno
+│   ├── controllers/       # Lógica de enrutamiento
+│   ├── middlewares/       # Multer (subida de archivos) y manejo de errores
+│   ├── routes/            # Definición de Endpoints
+│   └── services/          # Lógica Core (OpenAI, ExifTool, Scoring Forense)
+│
+├── .env                   # Variables de entorno del backend
+├── package.json           # Dependencias del backend
+└── docker-compose.yml     # Orquestación con Docker
 ```
 
-## Installation
+## ⚙️ Configuración y Despliegue
 
-### Using Docker (Recommended)
-1. Clone the repository.
-2. Copy `.env.example` to `.env` and fill in your details:
-   ```bash
-   cp .env.example .env
-   ```
-   *Make sure to add your `OPENAI_API_KEY`.*
-3. Run with Docker Compose:
-   ```bash
-   docker-compose up --build
-   ```
+### 1. Requisitos Previos
+- Node.js v18+
+- Clave de API de OpenAI (GPT-4o Vision habilitado)
 
-### Local Setup
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Configure `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-3. Start the server:
-   ```bash
-   npm run dev
-   ```
+### 2. Configuración de Variables de Entorno
+En la raíz del proyecto, copia el archivo de ejemplo y configura tu API Key:
+```bash
+cp .env.example .env
+```
+Edita `.env` para incluir:
+```env
+PORT=3000
+NODE_ENV=development
+OPENAI_API_KEY=sk-tu-api-key-aqui
+```
 
-## API Endpoints
+En la carpeta `frontend/`, si deseas cambiar la URL de la API:
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
 
-### `POST /api/images/validate`
+### 3. Instalación Local
+**Backend:**
+```bash
+# En la raíz del proyecto
+npm install
+npm run dev
+```
 
-Validates an image.
+**Frontend:**
+```bash
+# En una terminal nueva
+cd frontend
+npm install
+npm run dev
+```
 
-**Headers:**
+La aplicación web estará disponible en `http://localhost:5173`.
+
+### 4. Despliegue con Docker (Opcional)
+Puedes levantar el backend contenedorizado:
+```bash
+docker-compose up --build
+```
+
+## 📡 Documentación de la API
+
+### Endpoint: `POST /api/images/validate`
+
+Analiza una imagen basándose en el modo y el contexto especificado.
+
+**Headers Requeridos:**
 - `Content-Type: multipart/form-data`
 
-**Body:**
-- `image`: The image file to analyze (JPEG, PNG, WEBP).
+**Body (FormData):**
+- `image` *(File, Requerido)*: Archivo de imagen (JPEG, PNG, WEBP).
+- `analysisType` *(String, Opcional)*: Modo de operación.
+  - `ai_validation` (Por defecto): Busca señales de generación por IA.
+  - `data_extraction`: Actúa como OCR para extraer información estructurada.
+- `analysisContext` *(String, Opcional)*: Inyecta reglas de negocio al análisis.
+  - `general` (Por defecto): Reglas forenses estándar.
+  - `bimbo_marinela`: Reglas estrictas de empaque para productos Bimbo/Marinela (México).
 
-**Example cURL:**
+**Ejemplo de Petición (cURL):**
 ```bash
 curl -X POST http://localhost:3000/api/images/validate \
   -H "Content-Type: multipart/form-data" \
-  -F "image=@/path/to/your/image.jpg"
+  -F "image=@/ruta/a/foto.jpg" \
+  -F "analysisType=ai_validation" \
+  -F "analysisContext=bimbo_marinela"
 ```
 
-**Response:**
+**Respuesta Exitosa (Modo: Validación IA):**
 ```json
 {
   "success": true,
   "data": {
-    "finalScore": 85,
+    "mode": "ai_validation",
+    "finalScore": 100,
     "finalVerdict": "probable_ai_generated",
     "metadataAnalysis": {
-      "rawTags": {
-        "software": "Midjourney",
-        "creatorTool": "",
-        "make": "",
-        "model": ""
-      },
-      "detectedAiKeywords": ["midjourney"],
       "hasCameraMetadata": false,
-      "isMetadataSuspicious": true
+      "detectedAiKeywords": []
     },
     "visualAnalysis": {
-      "likelyAiGenerated": true,
-      "confidence": 90,
-      "verdict": "probable_ai_generated",
+      "has_illegible_text_or_garbled_small_details": true,
+      "ai_probability_score": 100,
       "visualSignals": [
-        "Inconsistent lighting on the subject's face",
-        "Unnatural texture on the background wall"
+        "El texto de información nutricional es ilegible.",
+        "Los Chocorroles vienen empacados en bolsa transparente y en trío, lo cual rompe las reglas corporativas."
       ],
-      "explanation": "The image exhibits several hallmarks of AI generation..."
+      "explanation": "..."
     }
   },
   "meta": {
-    "executionTimeMs": 2345
+    "executionTimeMs": 3500
   }
 }
 ```
 
-## Future Extensions
-- Queue processing for asynchronous analysis of large batches.
-- Integration with AWS S3 for persistent storage of analyzed images.
-- Additional forensics models (e.g., error level analysis).
-# izei-vision
+**Respuesta Exitosa (Modo: Extracción de Datos):**
+```json
+{
+  "success": true,
+  "data": {
+    "mode": "data_extraction",
+    "extractedData": {
+      "NOMBRE": "JUAN PEREZ",
+      "FECHA_NACIMIENTO": "05/07/1996"
+    }
+  },
+  "meta": {
+    "executionTimeMs": 2800
+  }
+}
+```

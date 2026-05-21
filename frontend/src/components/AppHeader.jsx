@@ -9,7 +9,7 @@ export const AppHeader = () => {
 
   return (
     <>
-      <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between glass-panel sticky top-0 z-50">
+      <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between bg-background shadow-neu-flat sticky top-0 z-50">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -55,7 +55,7 @@ export const AppHeader = () => {
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-premium relative"
+              className="bg-background rounded-3xl p-8 max-w-2xl w-full shadow-neu-flat relative"
             >
               <button 
                 onClick={() => setShowDocs(false)}
@@ -101,7 +101,7 @@ export const AppHeader = () => {
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-premium relative text-center"
+              className="bg-background rounded-3xl p-8 max-w-md w-full shadow-neu-flat relative text-center"
             >
               <button 
                 onClick={() => setShowSupport(false)}
@@ -111,8 +111,8 @@ export const AppHeader = () => {
               </button>
               <h2 className="text-2xl font-bold mb-6">Soporte Técnico</h2>
               
-              <div className="bg-muted/50 p-6 rounded-2xl flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-sm mb-2">
+              <div className="bg-background shadow-neu-pressed p-6 rounded-2xl flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-12 h-12 bg-background rounded-full flex items-center justify-center text-primary shadow-neu-flat mb-2">
                   <MapPin size={24} />
                 </div>
                 <h3 className="font-semibold text-foreground">Oficina Principal</h3>
